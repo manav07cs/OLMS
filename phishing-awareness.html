@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OLMS Phishing Awareness Demonstration</title>
+  <style>
+    :root {
+      --navy: #10213e;
+      --blue: #326bff;
+      --cyan: #24b7d6;
+      --text: #18243a;
+      --muted: #68748a;
+      --red: #d84c5b;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+      background: #0c1b33;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .frame-stage {
+      position: fixed;
+      inset: 0;
+    }
+
+    .project-frame {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #18325c;
+    }
+
+    /* Transparent overlay aligned with the Admin Login button in the dummy OLMS home page. */
+    .admin-overlay {
+      position: absolute;
+      z-index: 5;
+      left: calc(50% + 14px);
+      top: calc(50% - 65px);
+      width: 164px;
+      height: 56px;
+      padding: 0;
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+      color: transparent;
+    }
+
+    body.show-overlay .admin-overlay {
+      color: #fff;
+      background: rgba(216, 76, 91, .88);
+      border: 3px dashed #fff;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, .20);
+      font-weight: 800;
+    }
+
+    .keyboard-hint {
+      position: fixed;
+      z-index: 8;
+      right: 14px;
+      bottom: 14px;
+      margin: 0;
+      padding: 8px 11px;
+      border: 1px solid rgba(255, 255, 255, .22);
+      border-radius: 9px;
+      background: rgba(8, 20, 39, .76);
+      color: #d7e4fa;
+      font-size: 12px;
+      backdrop-filter: blur(8px);
+    }
+
+    .screen {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      display: none;
+    }
+
+    .screen.visible { display: grid; }
+
+    .fake-login {
+      min-height: 100%;
+      place-items: center;
+      padding: 30px;
+      background:
+        linear-gradient(125deg, rgba(9, 23, 47, .95), rgba(26, 66, 116, .88)),
+        radial-gradient(circle at 20% 20%, #4e8cff, transparent 35%);
+    }
+
+    .login-layout {
+      width: min(1060px, 100%);
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 28px;
+    }
+
+    .intro, .login-card {
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 24px;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, .25);
+    }
+
+    .intro {
+      padding: 58px;
+      color: #fff;
+      background: rgba(255, 255, 255, .10);
+      backdrop-filter: blur(14px);
+    }
+
+    .eyebrow {
+      color: #a9caff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .intro h1 {
+      margin: 14px 0;
+      font-size: clamp(40px, 6vw, 68px);
+      line-height: 1.02;
+    }
+
+    .intro p {
+      color: rgba(255, 255, 255, .78);
+      line-height: 1.7;
+    }
+
+    .feature-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .feature-list span {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .08);
+    }
+
+    .login-card {
+      padding: 36px;
+      color: var(--text);
+      background: rgba(255, 255, 255, .97);
+    }
+
+    .training-banner {
+      margin: 0 0 20px;
+      padding: 8px 10px;
+      border: 1px solid #ffc8d0;
+      border-radius: 10px;
+      color: #9b2d3b;
+      background: #ffeaed;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .login-card h2 {
+      margin: 0 0 20px;
+      font-size: 30px;
+    }
+
+    .form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      color: #40506a;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid #d5ddeb;
+      border-radius: 10px;
+      outline: none;
+      color: var(--text);
+      background: #fff;
+    }
+
+    .field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(50, 107, 255, .10);
+    }
+
+    .primary-button, .secondary-button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      border: 0;
+      border-radius: 11px;
+      padding: 12px 17px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .primary-button {
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 8px 20px rgba(50, 107, 255, .24);
+    }
+
+    .secondary-button {
+      color: var(--navy);
+      background: #fff;
+    }
+
+    .helper {
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .message {
+      display: none;
+      margin-bottom: 15px;
+      padding: 12px;
+      border: 1px solid #ffc8d0;
+      border-radius: 10px;
+      color: #a12d3c;
+      background: #ffeaed;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .message.visible { display: block; }
+
+    .result-screen {
+      place-items: center;
+      padding: 24px;
+      color: #fff;
+      background:
+        repeating-linear-gradient(0deg, rgba(255, 50, 70, .035), rgba(255, 50, 70, .035) 1px, transparent 1px, transparent 4px),
+        radial-gradient(circle at 50% 20%, rgba(216, 76, 91, .30), transparent 34%),
+        linear-gradient(135deg, #080b12, #250b14);
+    }
+
+    .result-card {
+      width: min(720px, 100%);
+      padding: 42px;
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, .10);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, .35);
+      text-align: center;
+      backdrop-filter: blur(14px);
+    }
+
+    .result-icon {
+      display: grid;
+      place-items: center;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      color: #b52f40;
+      background: #ffdfe3;
+      font-size: 38px;
+    }
+
+    .result-card h1 {
+      margin: 0 0 14px;
+      font-size: clamp(34px, 6vw, 58px);
+    }
+
+    .hacked-title {
+      color: #ff5267;
+      letter-spacing: .04em;
+      text-shadow: 0 0 12px rgba(255, 82, 103, .75), 0 0 35px rgba(255, 35, 65, .40);
+      animation: warning-pulse 1.05s ease-in-out infinite alternate;
+    }
+
+    @keyframes warning-pulse {
+      from { transform: scale(1); filter: brightness(.95); }
+      to { transform: scale(1.025); filter: brightness(1.18); }
+    }
+
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .login-layout { grid-template-columns: 1fr; }
+      .intro { padding: 34px; }
+      .admin-overlay {
+        left: calc(50% + 4px);
+        top: calc(50% - 45px);
+        width: 150px;
+      }
+      .keyboard-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="frame-stage" id="frameStage">
+    <iframe
+      class="project-frame"
+      src="https://olms-sigma.vercel.app/"
+      title="Dummy OLMS project used for an authorized phishing-awareness demonstration"
+      sandbox="allow-forms allow-scripts allow-same-origin"
+      referrerpolicy="no-referrer">
+    </iframe>
+
+    <button class="admin-overlay" id="adminOverlay" type="button" aria-label="Open the phishing-awareness choice">
+      Admin overlay
+    </button>
+
+    <p class="keyboard-hint">College security demo · Press D to reveal the overlay</p>
+  </main>
+
+  <section class="screen fake-login" id="fakeLogin" aria-label="Simulated fake administrator login">
+    <div class="login-layout">
+      <article class="intro">
+        <div class="eyebrow">Administrator access</div>
+        <h1>Manage the library.</h1>
+        <p>Manage books, members, returns, fines and reports from one clear dashboard.</p>
+        <div class="feature-list">
+          <span>✓ Manage books and members</span>
+          <span>✓ Track returns and fines</span>
+          <span>✓ View reports and activity</span>
+        </div>
+      </article>
+
+      <article class="login-card">
+        <div class="training-banner">ENTER CREDENTIALS </div>
+        <h2>Admin Login</h2>
+        <div class="message" id="loginMessage" role="alert"></div>
+        <form class="form" id="simulationForm" autocomplete="off">
+          <div class="field">
+            <label for="demoUsername">Username</label>
+            <input id="demoUsername" required autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="demoPassword">Password</label>
+            <input id="demoPassword" type="password" required autocomplete="new-password">
+          </div>
+          <button class="primary-button" type="submit">Login</button>
+        </form>
+      </article>
+    </div>
+  </section>
+
+  <section class="screen result-screen" id="resultScreen" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="result-card">
+      <div class="result-icon" aria-hidden="true">☠</div>
+      <h1 class="hacked-title" id="resultTitle">YOU ARE HACKED!</h1>
+      <div class="result-actions">
+        <button class="primary-button" id="restartDemo" type="button">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    "use strict";
+
+    const REAL_ADMIN_URL = "https://olms-sigma.vercel.app/#admin-login";
+    const frameStage = document.getElementById("frameStage");
+    const fakeLogin = document.getElementById("fakeLogin");
+    const resultScreen = document.getElementById("resultScreen");
+    const simulationForm = document.getElementById("simulationForm");
+    const loginMessage = document.getElementById("loginMessage");
+
+    document.getElementById("adminOverlay").addEventListener("click", () => {
+      const continueToSimulation = window.confirm("Click on OK To login");
+
+      if (continueToSimulation) {
+        frameStage.style.display = "none";
+        fakeLogin.classList.add("visible");
+        document.getElementById("demoUsername").focus();
+      } else {
+        window.location.href = REAL_ADMIN_URL;
+      }
+    });
+
+    simulationForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const usernameIsDummy = document.getElementById("demoUsername").value === "admin";
+      const passwordIsDummy = document.getElementById("demoPassword").value === "admin123";
+
+      simulationForm.reset();
+
+      if (!usernameIsDummy || !passwordIsDummy) {
+        loginMessage.textContent = "For safety, this demonstration accepts only admin / admin123.";
+        loginMessage.classList.add("visible");
+        return;
+      }
+
+      loginMessage.classList.remove("visible");
+      fakeLogin.classList.remove("visible");
+      resultScreen.classList.add("visible");
+    });
+
+    document.getElementById("restartDemo").addEventListener("click", () => {
+      resultScreen.classList.remove("visible");
+      frameStage.style.display = "block";
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key.toLowerCase() === "d" && frameStage.style.display !== "none") {
+        document.body.classList.toggle("show-overlay");
+      }
+    });
+  </script>
+</body>
+</html>
