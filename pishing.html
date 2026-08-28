@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OLMS Phishing Lab Control Panel</title>
+  <style>
+    :root {
+      --red: #ff3b46;
+      --red-dark: #b71925;
+      --green: #42e37e;
+      --yellow: #ffd43b;
+      --panel: #101217;
+      --line: #30343d;
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: #e7eaf0;
+      background:
+        radial-gradient(circle at 80% 5%, rgba(255, 48, 64, .12), transparent 28%),
+        #050607;
+    }
+
+    header {
+      padding: 22px max(24px, 5vw);
+      border-bottom: 1px solid #292c33;
+      background: rgba(8, 9, 11, .96);
+    }
+
+    header h1 {
+      margin: 0;
+      color: var(--red);
+      font-size: clamp(20px, 4vw, 27px);
+    }
+
+    header p {
+      margin: 7px 0 0;
+      color: #858b98;
+      font-size: 13px;
+    }
+
+    .container {
+      width: min(950px, 92%);
+      margin: 42px auto;
+    }
+
+    .card {
+      padding: clamp(24px, 5vw, 36px);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .42);
+    }
+
+    h2 { margin: 0 0 8px; color: #fff; }
+
+    .status {
+      margin: 20px 0 27px;
+      padding: 13px 16px;
+      border: 1px solid #176b38;
+      border-radius: 8px;
+      color: var(--green);
+      background: #07160d;
+    }
+
+    label {
+      display: block;
+      margin: 19px 0 8px;
+      color: #adb2bd;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid #3a3e48;
+      border-radius: 8px;
+      outline: none;
+      color: #fff;
+      background: #060709;
+      font: inherit;
+      font-size: 14px;
+    }
+
+    textarea { resize: vertical; line-height: 1.55; }
+    input:focus, textarea:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(255, 59, 70, .10);
+    }
+
+    .send-btn {
+      width: 100%;
+      margin-top: 27px;
+      padding: 14px;
+      border: 0;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--red-dark);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .send-btn:hover { background: #dc2532; }
+
+    .terminal {
+      min-height: 190px;
+      margin-top: 28px;
+      padding: 18px;
+      border: 1px solid #2f333b;
+      border-radius: 9px;
+      background: #020304;
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    .terminal-title {
+      margin-bottom: 12px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid #292c33;
+      color: #a5aab4;
+    }
+
+    .green { color: var(--green); }
+    .red { color: var(--red); }
+    .yellow { color: var(--yellow); }
+    .muted { color: #7e8490; }
+
+    .info {
+      margin-top: 23px;
+      padding: 15px;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      color: #aab0bc;
+      background: #121722;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚠ OLMS PHISHING LAB CONTROL PANEL</h1>
+    <p>Ethical Hacking • College Security Awareness Demonstration</p>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Simulated OLMS Phishing Campaign</h2>
+      <div class="status">● PHISHING LAB READY</div>
+
+      <label for="recipient">Demo Recipient</label>
+      <input id="recipient" type="email" placeholder="student@example.com" autocomplete="off">
+
+      <label for="phishingLink">Controlled Demo Link</label>
+      <input id="phishingLink" type="url" value="https://olms-sigma.vercel.app/fake.html">
+
+      <label for="subject">Email Subject</label>
+      <input id="subject" type="text" value="OLMS Account Verification Required">
+
+      <label for="message">Message</label>
+      <textarea id="message" rows="8">Dear Library User,
+
+Your OLMS administrator account requires verification. Please open the link below and complete the demonstration login.
+
+This message is part of an authorized college cybersecurity awareness practical.</textarea>
+
+      <button class="send-btn" id="sendMail" type="button">⚡ OPEN GMAIL COMPOSE</button>
+
+      <div class="terminal">
+        <div class="terminal-title">[ OLMS PHISHING LAB TERMINAL ]</div>
+        <div id="console">
+          <div class="green">[✓] System initialized</div>
+          <div class="muted">[SYSTEM] Waiting for demonstration...</div>
+        </div>
+      </div>
+
+      <div class="info">
+        <strong>Authorized demonstration only:</strong> Gmail opens with the entered information pre-filled. You must review and manually send the message. Use only your own test email accounts and the included safe simulation page.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const recipientInput = document.getElementById("recipient");
+    const linkInput = document.getElementById("phishingLink");
+    const subjectInput = document.getElementById("subject");
+    const messageInput = document.getElementById("message");
+    const terminal = document.getElementById("console");
+
+    if (location.protocol === "http:" || location.protocol === "https:") {
+      linkInput.value = new URL("fake.html", location.href).href;
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>'"]/g, character => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", "\"": "&quot;"
+      })[character]);
+    }
+
+    function showError(message) {
+      terminal.innerHTML = `<div class="red">[ERROR] ${escapeHTML(message)}</div>`;
+    }
+
+    function openGmailCompose() {
+      const recipient = recipientInput.value.trim();
+      const link = linkInput.value.trim();
+      const subject = subjectInput.value.trim();
+      const message = messageInput.value.trim();
+
+      if (!recipient) return showError("Enter a demo recipient.");
+      if (!recipientInput.checkValidity()) return showError("Enter a valid email address.");
+      if (!link) return showError("Enter the controlled fake.html demo link.");
+      if (!linkInput.checkValidity()) return showError("Enter a complete deployed demo URL.");
+      if (!subject) return showError("Enter an email subject.");
+
+      const emailBody = `${message}\n\nVerification Link:\n${link}\n\nOLMS Cybersecurity Awareness Demonstration`;
+      const gmailURL = "https://mail.google.com/mail/?view=cm&fs=1" +
+        "&to=" + encodeURIComponent(recipient) +
+        "&su=" + encodeURIComponent(subject) +
+        "&body=" + encodeURIComponent(emailBody);
+
+      terminal.innerHTML = `
+        <div class="green">[✓] Demonstration prepared</div>
+        <div>[✓] Recipient: ${escapeHTML(recipient)}</div>
+        <div>[✓] Subject: ${escapeHTML(subject)}</div>
+        <div class="yellow">[!] Opening Gmail Compose...</div>
+      `;
+
+      const gmailWindow = window.open(gmailURL, "_blank");
+
+      if (gmailWindow) {
+        // Disconnect the new tab from this page after it opens successfully.
+        gmailWindow.opener = null;
+        terminal.insertAdjacentHTML("beforeend", '<div class="green">[✓] Gmail Compose opened</div>');
+      } else {
+        // A same-tab fallback works even when the browser blocks new tabs.
+        terminal.innerHTML = `
+          <div class="yellow">[!] New tabs are blocked by the browser.</div>
+          <div class="green">[✓] Opening Gmail Compose in this tab...</div>
+        `;
+        window.location.href = gmailURL;
+      }
+    }
+
+    document.getElementById("sendMail").addEventListener("click", openGmailCompose);
+  </script>
+</body>
+</html>
